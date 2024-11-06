@@ -103,13 +103,15 @@ export default function CardSection() {
 
     if (!section || !cardElements.length) return
 
-    // Initial stack setup - BUILD on top
+    // Initial stack setup with smoother defaults
     gsap.set(cardElements, {
       x: 0,
       opacity: 1,
       force3D: true,
-      transformOrigin: 'bottom left',
-      immediateRender: true
+      transformOrigin: 'center center',
+      immediateRender: true,
+      rotationY: 0,
+      backfaceVisibility: 'hidden'
     })
 
     const setupCards = () => {
@@ -118,18 +120,18 @@ export default function CardSection() {
           rotation: index === 0 ? 0 : -(index * 8),
           scale: 1 - (index * 0.05),
           zIndex: totalCards - index,
+          transformPerspective: 1000
         })
       })
     }
 
     setupCards()
 
-    // Handle orientation change
-    const handleResize = () => {
+    const handleResize = gsap.utils.debounce(() => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill())
       setupCards()
       initScrollTrigger()
-    }
+    }, 100)
 
     const initScrollTrigger = () => {
       const ctx = gsap.context(() => {
@@ -138,8 +140,10 @@ export default function CardSection() {
           start: "top 1%",
           end: "+=200%",
           pin: true,
-          scrub: 0.5,
+          scrub: 1,
           anticipatePin: 1,
+          fastScrollEnd: true,
+          preventOverlaps: true,
           onUpdate: (self) => {
             const progress = Math.max(0, Math.min(self.progress * 1.1, 0.99))
             const currentIndex = Math.floor(progress * (totalCards - 0.01))
@@ -148,7 +152,7 @@ export default function CardSection() {
             if (currentIndex >= 0 && currentIndex < totalCards) {
               setSelectedCard(cards[currentIndex])
 
-              // Set initial z-index for all cards
+              // Set initial z-index with smoother transitions
               cardElements.forEach((card, i) => {
                 gsap.set(card, {
                   zIndex: isReversing ? 
@@ -157,12 +161,12 @@ export default function CardSection() {
                 })
               })
 
-              // Then animate other properties
+              // Animate with eased transitions
               gsap.to(cardElements, {
                 x: i => i < currentIndex ? -window.innerWidth : 0,
                 opacity: 1,
                 rotation: i => {
-                  if (i < currentIndex) return 8
+                  if (i < currentIndex) return isReversing ? -8 : 8
                   if (i === currentIndex) return 0
                   return -(i - currentIndex) * 8
                 },
@@ -171,9 +175,10 @@ export default function CardSection() {
                   if (i === currentIndex) return 1
                   return 1 - ((i - currentIndex) * 0.05)
                 },
-                duration: 0.2,
-                ease: "none",
-                overwrite: true
+                duration: 0.3,
+                ease: "power2.out",
+                overwrite: 'auto',
+                clearProps: "zIndex"
               })
             }
           }
