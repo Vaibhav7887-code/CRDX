@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Bebas_Neue } from 'next/font/google'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -29,7 +29,8 @@ type OfferItem = {
   }[]
 }
 
-const offerItems: OfferItem[] = [
+// Export offerItems
+export const offerItems: OfferItem[] = [
   {
     id: 1,
     title: "CRDX CARDS",
@@ -140,6 +141,7 @@ const offerItems: OfferItem[] = [
 export default function OfferSection() {
   const [selectedOffer, setSelectedOffer] = useState<OfferItem>(offerItems[0])
   const [direction, setDirection] = useState(0)
+  const [currentMobileCard, setCurrentMobileCard] = useState(0)
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -236,8 +238,37 @@ export default function OfferSection() {
     </div>
   )
 
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget
+    const scrollPosition = container.scrollLeft
+    const cardWidth = container.offsetWidth * 0.85 // 85vw width of each card
+    const gap = 16 // gap-4 = 16px
+    
+    // Calculate current card index
+    const index = Math.round(scrollPosition / (cardWidth + gap))
+    if (index !== currentMobileCard) {
+      setCurrentMobileCard(index)
+      setSelectedOffer(offerItems[index])
+    }
+  }
+
+  useEffect(() => {
+    const handleSetOffer = (event: CustomEvent) => {
+      const offerId = event.detail
+      const offer = offerItems.find(item => item.id === offerId)
+      if (offer) {
+        setSelectedOffer(offer)
+      }
+    }
+
+    window.addEventListener('setOffer', handleSetOffer as EventListener)
+    return () => {
+      window.removeEventListener('setOffer', handleSetOffer as EventListener)
+    }
+  }, [])
+
   return (
-    <section className="w-full bg-background py-12 lg:py-20">
+    <section id="offering" className="w-full bg-background py-12 lg:py-20">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-32">
         <h2 className={`${bebasNeue.className} text-4xl md:text-5xl lg:text-7xl text-white mb-8 lg:mb-16`}>
           what do we offer?
@@ -357,7 +388,10 @@ export default function OfferSection() {
         {/* Mobile Layout */}
         <div className="lg:hidden">
           <div className="relative w-screen -mx-4 md:-mx-8">
-            <div className="flex flex-row gap-4 overflow-x-scroll hide-scrollbar px-4 md:px-8 pb-12">
+            <div 
+              className="flex flex-row gap-4 overflow-x-scroll hide-scrollbar px-4 md:px-8 pb-12"
+              onScroll={handleScroll}
+            >
               {offerItems.map((item) => (
                 <div 
                   key={item.id}
@@ -367,10 +401,6 @@ export default function OfferSection() {
                     backdropFilter: 'blur(75px)',
                     WebkitBackdropFilter: 'blur(75px)',
                     border: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}
-                  onClick={() => {
-                    setDirection(item.id > selectedOffer.id ? 1 : -1)
-                    setSelectedOffer(item)
                   }}
                 >
                   <div className="flex flex-col h-full p-6">
@@ -396,16 +426,26 @@ export default function OfferSection() {
               ))}
             </div>
 
+            {/* Navigation Dots - Updated to use currentMobileCard */}
             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-              {offerItems.map((item) => (
+              {offerItems.map((item, index) => (
                 <button
                   key={item.id}
                   onClick={() => {
-                    setDirection(item.id > selectedOffer.id ? 1 : -1)
+                    const container = document.querySelector('.overflow-x-scroll')
+                    if (container) {
+                      const cardWidth = container.clientWidth * 0.85
+                      const gap = 16
+                      container.scrollTo({
+                        left: index * (cardWidth + gap),
+                        behavior: 'smooth'
+                      })
+                    }
+                    setCurrentMobileCard(index)
                     setSelectedOffer(item)
                   }}
                   className={`w-3 h-3 rounded-full transition-colors ${
-                    selectedOffer.id === item.id ? 'bg-[#FFD700]' : 'bg-white/30'
+                    currentMobileCard === index ? 'bg-[#FFD700]' : 'bg-white/30'
                   }`}
                 />
               ))}

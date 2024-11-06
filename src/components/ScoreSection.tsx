@@ -36,7 +36,7 @@ const scoreItems = [
 
 export default function ScoreSection() {
   return (
-    <section className="w-full py-20">
+    <section id="score" className="w-full py-20">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-32">
         {/* Heading */}
         <motion.h2 

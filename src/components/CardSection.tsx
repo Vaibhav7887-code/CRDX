@@ -136,9 +136,19 @@ export default function CardSection() {
           if (currentIndex >= 0 && currentIndex < totalCards) {
             setSelectedCard(cards[currentIndex])
 
+            // Set initial z-index for all cards
+            cardElements.forEach((card, i) => {
+              gsap.set(card, {
+                zIndex: isReversing ? 
+                  (i >= currentIndex ? totalCards + (totalCards - i) : i) :
+                  (i <= currentIndex ? totalCards - (currentIndex - i) : totalCards - (i - currentIndex))
+              })
+            })
+
+            // Then animate other properties
             gsap.to(cardElements, {
               x: i => i < currentIndex ? -window.innerWidth : 0,
-              opacity: i => i < currentIndex ? 0 : 1,
+              opacity: 1,
               rotation: i => {
                 if (i < currentIndex) return 8
                 if (i === currentIndex) return 0
@@ -148,11 +158,6 @@ export default function CardSection() {
                 if (i < currentIndex) return 0.95
                 if (i === currentIndex) return 1
                 return 1 - ((i - currentIndex) * 0.05)
-              },
-              zIndex: i => {
-                if (i < currentIndex) return i
-                if (i === currentIndex) return totalCards
-                return totalCards - (i - currentIndex)
               },
               duration: 0.2,
               ease: "none",
