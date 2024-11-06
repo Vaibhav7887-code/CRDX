@@ -87,19 +87,6 @@ const cards: CardInfo[] = [
   }
 ]
 
-// Add this debounce function at the top of the file, before the component
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
-  
-  return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
 export default function CardSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
@@ -116,15 +103,16 @@ export default function CardSection() {
 
     if (!section || !cardElements.length) return
 
-    // Initial stack setup with smoother defaults
+    // Initial stack setup - BUILD on top
     gsap.set(cardElements, {
       x: 0,
       opacity: 1,
       force3D: true,
-      transformOrigin: 'center center',
+      transformOrigin: 'bottom left',
       immediateRender: true,
-      rotationY: 0,
-      backfaceVisibility: 'hidden'
+      transformPerspective: 1000,
+      backfaceVisibility: 'hidden',
+      willChange: 'transform'
     })
 
     const setupCards = () => {
@@ -133,19 +121,18 @@ export default function CardSection() {
           rotation: index === 0 ? 0 : -(index * 8),
           scale: 1 - (index * 0.05),
           zIndex: totalCards - index,
-          transformPerspective: 1000
         })
       })
     }
 
     setupCards()
 
-    // Use our custom debounce instead of gsap.utils.debounce
-    const handleResize = debounce(() => {
+    // Handle orientation change
+    const handleResize = () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill())
       setupCards()
       initScrollTrigger()
-    }, 100)
+    }
 
     const initScrollTrigger = () => {
       const ctx = gsap.context(() => {
@@ -154,10 +141,8 @@ export default function CardSection() {
           start: "top 1%",
           end: "+=200%",
           pin: true,
-          scrub: 1,
+          scrub: 0.5,
           anticipatePin: 1,
-          fastScrollEnd: true,
-          preventOverlaps: true,
           onUpdate: (self) => {
             const progress = Math.max(0, Math.min(self.progress * 1.1, 0.99))
             const currentIndex = Math.floor(progress * (totalCards - 0.01))
@@ -166,7 +151,7 @@ export default function CardSection() {
             if (currentIndex >= 0 && currentIndex < totalCards) {
               setSelectedCard(cards[currentIndex])
 
-              // Set initial z-index with smoother transitions
+              // Set initial z-index for all cards
               cardElements.forEach((card, i) => {
                 gsap.set(card, {
                   zIndex: isReversing ? 
@@ -175,12 +160,12 @@ export default function CardSection() {
                 })
               })
 
-              // Animate with eased transitions
+              // Then animate other properties
               gsap.to(cardElements, {
                 x: i => i < currentIndex ? -window.innerWidth : 0,
                 opacity: 1,
                 rotation: i => {
-                  if (i < currentIndex) return isReversing ? -8 : 8
+                  if (i < currentIndex) return 8
                   if (i === currentIndex) return 0
                   return -(i - currentIndex) * 8
                 },
@@ -189,10 +174,9 @@ export default function CardSection() {
                   if (i === currentIndex) return 1
                   return 1 - ((i - currentIndex) * 0.05)
                 },
-                duration: 0.3,
-                ease: "power2.out",
-                overwrite: 'auto',
-                clearProps: "zIndex"
+                duration: 0.2,
+                ease: "none",
+                overwrite: true
               })
             }
           }
@@ -339,7 +323,16 @@ export default function CardSection() {
       </section>
 
       {/* Card Animation Section */}
-      <section ref={sectionRef} id="card" className="w-full relative h-screen z-10">
+      <section 
+        ref={sectionRef} 
+        id="card" 
+        className="w-full relative h-screen z-10"
+        style={{
+          touchAction: 'pan-y',
+          overscrollBehavior: 'contain',
+          willChange: 'transform'
+        }}
+      >
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="max-w-[1440px] w-full px-4 md:px-8 lg:px-32">
             <div className="flex flex-col lg:flex-row items-center gap-2 lg:gap-12 pt-[80px] lg:pt-0">
