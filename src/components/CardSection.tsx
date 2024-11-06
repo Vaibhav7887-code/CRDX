@@ -48,7 +48,7 @@ const cards: CardInfo[] = [
       "0% interest unless you want to pay in installments in that case 29.8% representative APR (Fixed)",
       "No international fees",
       "No ATM fees",
-      "£15 subscription fee"
+      "£5 subscription fee"
     ]
   },
   {
@@ -61,7 +61,7 @@ const cards: CardInfo[] = [
       "0% interest unless you want to pay in installments in that case 29.8% representative APR (Fixed)",
       "No international fees",
       "No ATM fees",
-      "£5 subscription fee",
+      "£15 subscription fee",
       "Gadget Insurance",
       "Purchase Protection Insurance",
       "Deals and Vouchers"
