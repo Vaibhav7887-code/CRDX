@@ -87,6 +87,19 @@ const cards: CardInfo[] = [
   }
 ]
 
+// Add this debounce function at the top of the file, before the component
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  
+  return (...args: Parameters<T>) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
 export default function CardSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
@@ -127,7 +140,8 @@ export default function CardSection() {
 
     setupCards()
 
-    const handleResize = gsap.utils.debounce(() => {
+    // Use our custom debounce instead of gsap.utils.debounce
+    const handleResize = debounce(() => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill())
       setupCards()
       initScrollTrigger()
