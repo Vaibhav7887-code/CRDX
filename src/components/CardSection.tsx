@@ -112,64 +112,86 @@ export default function CardSection() {
       immediateRender: true
     })
 
-    cardElements.forEach((card, index) => {
-      gsap.set(card, {
-        rotation: index === 0 ? 0 : -(index * 8),
-        scale: 1 - (index * 0.05),
-        zIndex: totalCards - index,
+    const setupCards = () => {
+      cardElements.forEach((card, index) => {
+        gsap.set(card, {
+          rotation: index === 0 ? 0 : -(index * 8),
+          scale: 1 - (index * 0.05),
+          zIndex: totalCards - index,
+        })
       })
-    })
+    }
 
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: section,
-        start: "top 1%",
-        end: "+=200%",
-        pin: true,
-        scrub: 0.5,
-        anticipatePin: 1,
-        onUpdate: (self) => {
-          const progress = Math.max(0, Math.min(self.progress * 1.1, 0.99))
-          const currentIndex = Math.floor(progress * (totalCards - 0.01))
-          const isReversing = self.getVelocity() < 0
-          
-          if (currentIndex >= 0 && currentIndex < totalCards) {
-            setSelectedCard(cards[currentIndex])
+    setupCards()
 
-            // Set initial z-index for all cards
-            cardElements.forEach((card, i) => {
-              gsap.set(card, {
-                zIndex: isReversing ? 
-                  (i >= currentIndex ? totalCards + (totalCards - i) : i) :
-                  (i <= currentIndex ? totalCards - (currentIndex - i) : totalCards - (i - currentIndex))
+    // Handle orientation change
+    const handleResize = () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+      setupCards()
+      initScrollTrigger()
+    }
+
+    const initScrollTrigger = () => {
+      const ctx = gsap.context(() => {
+        ScrollTrigger.create({
+          trigger: section,
+          start: "top 1%",
+          end: "+=200%",
+          pin: true,
+          scrub: 0.5,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            const progress = Math.max(0, Math.min(self.progress * 1.1, 0.99))
+            const currentIndex = Math.floor(progress * (totalCards - 0.01))
+            const isReversing = self.getVelocity() < 0
+            
+            if (currentIndex >= 0 && currentIndex < totalCards) {
+              setSelectedCard(cards[currentIndex])
+
+              // Set initial z-index for all cards
+              cardElements.forEach((card, i) => {
+                gsap.set(card, {
+                  zIndex: isReversing ? 
+                    (i >= currentIndex ? totalCards + (totalCards - i) : i) :
+                    (i <= currentIndex ? totalCards - (currentIndex - i) : totalCards - (i - currentIndex))
+                })
               })
-            })
 
-            // Then animate other properties
-            gsap.to(cardElements, {
-              x: i => i < currentIndex ? -window.innerWidth : 0,
-              opacity: 1,
-              rotation: i => {
-                if (i < currentIndex) return 8
-                if (i === currentIndex) return 0
-                return -(i - currentIndex) * 8
-              },
-              scale: i => {
-                if (i < currentIndex) return 0.95
-                if (i === currentIndex) return 1
-                return 1 - ((i - currentIndex) * 0.05)
-              },
-              duration: 0.2,
-              ease: "none",
-              overwrite: true
-            })
+              // Then animate other properties
+              gsap.to(cardElements, {
+                x: i => i < currentIndex ? -window.innerWidth : 0,
+                opacity: 1,
+                rotation: i => {
+                  if (i < currentIndex) return 8
+                  if (i === currentIndex) return 0
+                  return -(i - currentIndex) * 8
+                },
+                scale: i => {
+                  if (i < currentIndex) return 0.95
+                  if (i === currentIndex) return 1
+                  return 1 - ((i - currentIndex) * 0.05)
+                },
+                duration: 0.2,
+                ease: "none",
+                overwrite: true
+              })
+            }
           }
-        }
+        })
       })
-    })
+
+      return () => ctx.revert()
+    }
+
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('orientationchange', handleResize)
+
+    const cleanup = initScrollTrigger()
 
     return () => {
-      ctx.revert()
+      cleanup()
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('orientationchange', handleResize)
       ScrollTrigger.getAll().forEach(trigger => trigger.kill())
     }
   }, [])
