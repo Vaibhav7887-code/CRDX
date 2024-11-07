@@ -57,7 +57,7 @@ export default function VideoSection() {
           }}
         >
           <Image
-            src="/assets/CRDXgif.gif"
+            src="/assets/CrdxFinalAnimation.gif"
             alt="CRDX Animation"
             fill
             className="object-cover"
