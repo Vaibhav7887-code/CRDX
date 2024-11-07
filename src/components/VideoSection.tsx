@@ -46,25 +46,11 @@ export default function VideoSection() {
       className="relative h-[calc(100vh-80px)] lg:-mt-32 mt-25"
     >
       <motion.div 
-        className="sticky top-0 w-full h-[calc(100vh-80px)] flex items-center justify-center"
-        style={{
-          willChange: 'transform',
-          WebkitBackfaceVisibility: 'hidden',
-          backfaceVisibility: 'hidden',
-          WebkitTransform: 'translate3d(0,0,0)',
-          transform: 'translate3d(0,0,0)'
-        }}
+        className="sticky top-0 w-full h-[calc(100vh-80px)] flex items-center justify-center will-change-transform"
       >
         <motion.div
-          className="relative w-full h-full"
-          style={{ 
-            clipPath,
-            willChange: 'transform',
-            WebkitBackfaceVisibility: 'hidden',
-            backfaceVisibility: 'hidden',
-            WebkitTransform: 'translate3d(0,0,0)',
-            transform: 'translate3d(0,0,0)'
-          }}
+          className="relative w-full h-full will-change-transform"
+          style={{ clipPath }}
           transition={{ 
             duration: 0.5,
             ease: "easeInOut"
@@ -76,14 +62,6 @@ export default function VideoSection() {
             muted
             playsInline
             className="w-full h-full object-cover"
-            preload="auto"
-            style={{
-              willChange: 'transform',
-              WebkitBackfaceVisibility: 'hidden',
-              backfaceVisibility: 'hidden',
-              WebkitTransform: 'translate3d(0,0,0)',
-              transform: 'translate3d(0,0,0)'
-            }}
           >
             <source src="/assets/CrdxFinalAnimVideo.mp4" type="video/mp4" />
           </video>

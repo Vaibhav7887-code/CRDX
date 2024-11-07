@@ -59,7 +59,6 @@ export default function Navbar() {
     setIsMenuOpen(false) // Close mobile menu after click
   }
 
-  // Add this function
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -100,12 +99,9 @@ export default function Navbar() {
             scrolled ? 'rounded-full nav-glass' : ''
           }`}
         >
-          {/* Make logo clickable */}
-          <div 
+          <button 
             onClick={scrollToTop}
             className="cursor-pointer"
-            role="button"
-            tabIndex={0}
           >
             <Image 
               src="/assets/logo.png" 
@@ -114,7 +110,7 @@ export default function Navbar() {
               height={28} 
               className="object-contain"
             />
-          </div>
+          </button>
           
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center gap-16">
