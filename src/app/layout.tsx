@@ -19,7 +19,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${nunitoSans.className}`}>{children}</body>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preload" as="image" href="/assets/PageThread.png" />
+        <link rel="preload" as="video" href="/assets/CrdxFinalAnimVideo.mp4" />
+      </head>
+      <body className={`${nunitoSans.className} safari-fix`}>{children}</body>
     </html>
   )
 }
