@@ -56,14 +56,15 @@ export default function VideoSection() {
             ease: "easeInOut"
           }}
         >
-          <Image
-            src="/assets/CrdxFinalAnimation.gif"
-            alt="CRDX Animation"
-            fill
-            className="object-cover"
-            priority
-            unoptimized // Since it's a GIF, we want to keep the animation
-          />
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          >
+            <source src="/assets/CrdxFinalAnimVideo.mp4" type="video/mp4" />
+          </video>
         </motion.div>
       </motion.div>
     </section>
