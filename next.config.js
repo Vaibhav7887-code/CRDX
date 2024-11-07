@@ -7,7 +7,7 @@ const nextConfig = {
     formats: ['image/webp'],
   },
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
     optimizePackageImports: ['framer-motion', 'gsap'],
   }
 }
