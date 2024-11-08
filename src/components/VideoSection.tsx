@@ -1,10 +1,30 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, easeInOut } from 'framer-motion'
+import Image from 'next/image'
 
 export default function VideoSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    checkMobile()
+
+    let timeoutId: NodeJS.Timeout
+    const handleResize = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(checkMobile, 100)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      clearTimeout(timeoutId)
+    }
+  }, [])
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -14,7 +34,9 @@ export default function VideoSection() {
   const clipPath = useTransform(
     scrollYProgress,
     [0.1, 0.3],
-    ["inset(30% 30% 30% 30%)", "inset(0% 0% 0% 0%)"],
+    isMobile 
+      ? ["inset(0% 20% 0% 20%)", "inset(0% 0% 0% 0%)"]
+      : ["inset(0% 30% 0% 30%)", "inset(0% 0% 0% 0%)"],
     { ease: easeInOut }
   )
 
@@ -42,6 +64,7 @@ export default function VideoSection() {
             className="w-full h-full object-cover"
           >
             <source src="/assets/CrdxFinalAnimVideo.webm" type="video/webm" />
+            <source src="/assets/CrdxFinalAnimVideo.mp4" type="video/mp4" />
           </video>
         </motion.div>
       </motion.div>
