@@ -1,10 +1,25 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
+  output: 'standalone',
   images: {
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 2500, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 512, 1024, 2048],
-    remotePatterns: [],
-    unoptimized: true
+    unoptimized: true, // If you're using a static export
+  },
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.(mp4|webm)$/i,
+      use: [
+        {
+          loader: 'file-loader',
+          options: {
+            publicPath: '/_next/static/media/',
+            outputPath: 'static/media/',
+            name: '[name].[hash].[ext]',
+          },
+        },
+      ],
+    })
+    return config
   },
 }
 
