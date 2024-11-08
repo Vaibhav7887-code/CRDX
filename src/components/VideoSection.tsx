@@ -2,22 +2,24 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, easeInOut } from 'framer-motion'
-import Image from 'next/image'
 
 export default function VideoSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
   
   useEffect(() => {
-    const checkMobile = () => {
+    const checkDevice = () => {
       setIsMobile(window.innerWidth < 1024)
+      // Check if device is iOS
+      setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent))
     }
-    checkMobile()
+    checkDevice()
 
     let timeoutId: NodeJS.Timeout
     const handleResize = () => {
       clearTimeout(timeoutId)
-      timeoutId = setTimeout(checkMobile, 100)
+      timeoutId = setTimeout(checkDevice, 100)
     }
     window.addEventListener('resize', handleResize)
     return () => {
@@ -63,8 +65,10 @@ export default function VideoSection() {
             loop
             className="w-full h-full object-cover"
           >
-            <source src="/assets/CrdxFinalAnimVideo.webm" type="video/webm" />
-            <source src="/assets/CrdxFinalAnimVideo.mp4" type="video/mp4" />
+            <source 
+              src={isIOS ? "/assets/CrdxFinalAnimVideoIOS.mp4" : "/assets/CrdxFinalAnimVideo.mp4"} 
+              type="video/mp4" 
+            />
           </video>
         </motion.div>
       </motion.div>
