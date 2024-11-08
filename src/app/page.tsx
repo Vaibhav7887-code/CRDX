@@ -44,7 +44,7 @@ export default function Home() {
               Decide your own credit; control your limits!
             </h1>
             <p className="text-[#ADB2B1] text-xl leading-relaxed">
-              Discover the power of our secure and rewarding credit cards. 
+              Discover the power of our <span className="text-[#FFD700]">SECURED CREDIT CARDS WITH REWARDS</span>. 
               Explore our range of credit cards and take control of your finances today.
             </p>
           </motion.div>
@@ -157,7 +157,7 @@ export default function Home() {
               Decide your own credit; control your limits!
             </h1>
             <p className="text-[#ADB2B1] text-sm sm:text-base leading-relaxed text-center">
-              Discover the power of our secure and rewarding credit cards. 
+              Discover the power of our <span className="text-[#FFD700]">SECURED CREDIT CARDS WITH REWARDS</span>. 
               Explore our range of credit cards and take control of your finances today.
             </p>
           </motion.div>
