@@ -5,26 +5,39 @@ import { motion, useScroll, useTransform, easeInOut } from 'framer-motion'
 
 export default function VideoSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const [isMobile, setIsMobile] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
   
   useEffect(() => {
     const checkDevice = () => {
       setIsMobile(window.innerWidth < 1024)
-      // Check if device is iOS
-      setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent))
+      // More comprehensive iOS detection
+      setIsIOS(
+        ['iPad', 'iPhone', 'iPod'].includes(navigator.platform) ||
+        (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+      )
     }
     checkDevice()
 
-    let timeoutId: NodeJS.Timeout
-    const handleResize = () => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(checkDevice, 100)
+    // Try to play video after user interaction
+    const handleInteraction = () => {
+      if (videoRef.current) {
+        const playPromise = videoRef.current.play()
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.log("Video play error:", error)
+          })
+        }
+      }
     }
-    window.addEventListener('resize', handleResize)
+
+    document.addEventListener('touchstart', handleInteraction)
+    window.addEventListener('resize', checkDevice)
+
     return () => {
-      window.removeEventListener('resize', handleResize)
-      clearTimeout(timeoutId)
+      document.removeEventListener('touchstart', handleInteraction)
+      window.removeEventListener('resize', checkDevice)
     }
   }, [])
 
@@ -59,10 +72,12 @@ export default function VideoSection() {
           }}
         >
           <video
+            ref={videoRef}
             autoPlay
             playsInline
             muted
             loop
+            preload="auto"
             className="w-full h-full object-cover"
           >
             <source 
