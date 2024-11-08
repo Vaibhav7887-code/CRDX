@@ -5,39 +5,23 @@ import { motion, useScroll, useTransform, easeInOut } from 'framer-motion'
 
 export default function VideoSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
   const [isMobile, setIsMobile] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
   
   useEffect(() => {
-    const checkDevice = () => {
+    const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024)
-      // More comprehensive iOS detection
-      setIsIOS(
-        ['iPad', 'iPhone', 'iPod'].includes(navigator.platform) ||
-        (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-      )
     }
-    checkDevice()
+    checkMobile()
 
-    // Try to play video after user interaction
-    const handleInteraction = () => {
-      if (videoRef.current) {
-        const playPromise = videoRef.current.play()
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.log("Video play error:", error)
-          })
-        }
-      }
+    let timeoutId: NodeJS.Timeout
+    const handleResize = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(checkMobile, 100)
     }
-
-    document.addEventListener('touchstart', handleInteraction)
-    window.addEventListener('resize', checkDevice)
-
+    window.addEventListener('resize', handleResize)
     return () => {
-      document.removeEventListener('touchstart', handleInteraction)
-      window.removeEventListener('resize', checkDevice)
+      window.removeEventListener('resize', handleResize)
+      clearTimeout(timeoutId)
     }
   }, [])
 
@@ -72,18 +56,13 @@ export default function VideoSection() {
           }}
         >
           <video
-            ref={videoRef}
             autoPlay
             playsInline
             muted
             loop
-            preload="auto"
             className="w-full h-full object-cover"
           >
-            <source 
-              src={isIOS ? "/assets/CrdxFinalAnimVideoH264.mp4" : "/assets/CrdxFinalAnimVideo.mp4"} 
-              type="video/mp4" 
-            />
+            <source src="/assets/CrdxFinalAnimVideoH264.mp4" type="video/mp4" />
           </video>
         </motion.div>
       </motion.div>
