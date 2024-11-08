@@ -106,8 +106,8 @@ export default function Navbar() {
             <Image 
               src="/assets/logo.png" 
               alt="Logo" 
-              width={80}
-              height={28} 
+              width={120}
+              height={42}
               className="object-contain"
             />
           </button>
