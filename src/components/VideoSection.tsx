@@ -66,7 +66,7 @@ export default function VideoSection() {
             className="w-full h-full object-cover"
           >
             <source 
-              src={isIOS ? "/assets/CrdxFinalAnimVideoIOS.mp4" : "/assets/CrdxFinalAnimVideo.mp4"} 
+              src={isIOS ? "/assets/CrdxFinalAnimVideoH264.mp4" : "/assets/CrdxFinalAnimVideo.mp4"} 
               type="video/mp4" 
             />
           </video>
