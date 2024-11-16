@@ -4,7 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 import { useRef, useState, useEffect } from 'react'
 import { Bebas_Neue } from 'next/font/google'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger'
 
@@ -91,6 +91,32 @@ export default function CardSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
   const [selectedCard, setSelectedCard] = useState(cards[0])
+  const [currentBenefitSlide, setCurrentBenefitSlide] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Function to check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Reset benefit slide when card changes
+  useEffect(() => {
+    setCurrentBenefitSlide(0)
+  }, [selectedCard])
+
+  // Function to chunk benefits into pairs for mobile
+  const getBenefitSlides = (features: string[]) => {
+    const slides = []
+    for (let i = 0; i < features.length; i += 2) {
+      slides.push(features.slice(i, i + 2))
+    }
+    return slides
+  }
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -199,6 +225,83 @@ export default function CardSection() {
     }
   }, [])
 
+  // Render different content based on device type
+  const renderCardContent = () => {
+    if (isMobile) {
+      return (
+        <div className="w-full h-[calc(100%-140px)]">
+          <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar">
+            {selectedCard.features.map((feature, index) => (
+              <div 
+                key={index}
+                className="flex-none w-full snap-center px-4"
+              >
+                <div className="p-4 rounded-xl bg-white/10 backdrop-blur-sm">
+                  <p className="text-white text-base">{feature}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Dots */}
+          <div className="flex justify-center gap-2 mt-4">
+            {selectedCard.features.map((_, index) => (
+              <button
+                key={index}
+                className={`w-2 h-2 rounded-full ${
+                  index === currentBenefitSlide ? 'bg-[#FFD700]' : 'bg-white/30'
+                }`}
+                onClick={() => {
+                  const container = document.querySelector('.overflow-x-auto');
+                  if (container) {
+                    container.scrollTo({
+                      left: index * container.clientWidth,
+                      behavior: 'smooth'
+                    });
+                    setCurrentBenefitSlide(index);
+                  }
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Desktop version with vertical scroll
+    return (
+      <div className="overflow-y-auto pr-6 h-[calc(100%-140px)]">
+        <style jsx global>{`
+          .overflow-y-auto::-webkit-scrollbar {
+            width: 8px;
+          }
+          .overflow-y-auto::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .overflow-y-auto::-webkit-scrollbar-thumb {
+            background-color: #4A4A4A;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+          }
+        `}</style>
+        <motion.ul 
+          className="space-y-2 lg:space-y-4 text-sm lg:text-base"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 20 }}
+          transition={{ duration: 0.3 }}
+        >
+          {selectedCard.features.map((feature, index) => (
+            <li key={index} className="text-white leading-relaxed">
+              {feature}
+            </li>
+          ))}
+        </motion.ul>
+      </div>
+    )
+  }
+
   return (
     <>
       {/* Info Cards Section */}
@@ -222,6 +325,7 @@ export default function CardSection() {
                   src="/assets/setbudget.png"
                   alt="Set Budget"
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-contain"
                 />
               </motion.div>
@@ -260,6 +364,7 @@ export default function CardSection() {
                   src="/assets/addmoney.png"
                   alt="Add Money"
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-contain"
                 />
               </motion.div>
@@ -298,6 +403,7 @@ export default function CardSection() {
                   src="/assets/getstarted.png"
                   alt="Get Started"
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-contain"
                 />
               </motion.div>
@@ -356,6 +462,7 @@ export default function CardSection() {
                         src={card.image}
                         alt={`CRDX ${card.name} Card`}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-contain"
                         priority={card.id === selectedCard.id}
                         loading="eager"
@@ -391,42 +498,8 @@ export default function CardSection() {
                     </h3>
                   </div>
 
-                  {/* Scrollable Content */}
-                  <div 
-                    className="overflow-y-auto pr-6 h-[calc(100%-140px)]"
-                    style={{ 
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: '#4A4A4A transparent',
-                    }}
-                  >
-                    <style jsx global>{`
-                      .overflow-y-auto::-webkit-scrollbar {
-                        width: 8px;
-                      }
-                      .overflow-y-auto::-webkit-scrollbar-track {
-                        background: transparent;
-                      }
-                      .overflow-y-auto::-webkit-scrollbar-thumb {
-                        background-color: #4A4A4A;
-                        border-radius: 20px;
-                        border: 2px solid transparent;
-                        background-clip: padding-box;
-                      }
-                    `}</style>
-                    <motion.ul 
-                      className="space-y-2 lg:space-y-4 text-sm lg:text-base"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {selectedCard.features.map((feature, index) => (
-                        <li key={index} className="text-white leading-relaxed">
-                          {feature}
-                        </li>
-                      ))}
-                    </motion.ul>
-                  </div>
+                  {/* Render content based on device type */}
+                  {renderCardContent()}
                 </motion.div>
               </div>
             </div>
